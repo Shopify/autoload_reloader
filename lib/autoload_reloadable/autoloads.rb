@@ -51,9 +51,19 @@ module AutoloadReloadable
       end
     end
 
+    def self.define_module_trace
+      @define_module_trace ||= TracePoint.new(:class) do |tp|
+        defined_module = tp.self
+        UnloadedNamespaces.loaded(defined_module)
+      end
+    end
+
     def self.add(const_ref)
-      const_ref.parent.autoload(const_ref.name, const_ref.filename)
+      if const_ref_by_filename.empty?
+        define_module_trace.enable
+      end
       const_ref_by_filename[const_ref.filename] = const_ref
+      const_ref.parent.autoload(const_ref.name, const_ref.filename)
     end
 
     def self.remove(const_ref)
@@ -66,6 +76,9 @@ module AutoloadReloadable
         mod = const_ref.parent.const_get(const_ref.name)
         Loaded.add_reloadable(const_ref)
         UnloadedNamespaces.loaded(mod)
+        if const_ref_by_filename.empty?
+          define_module_trace.disable
+        end
       end
     end
 
@@ -76,6 +89,7 @@ module AutoloadReloadable
         const_ref.parent.send(:remove_const, const_ref.name)
       end
       const_ref_by_filename.clear
+      define_module_trace.disable
     end
 
     def self.eager_load

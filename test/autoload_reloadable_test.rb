@@ -179,4 +179,12 @@ class AutoloadReloadableTest < Minitest::Test
   ensure
     $LOAD_PATH.delete(@tmpdir)
   end
+
+  def test_reference_nested_const_from_parent
+    File.write(File.join(@tmpdir, "outer.rb"), "class Outer; INNER_VALUE = Inner.value; end")
+    Dir.mkdir(File.join(@tmpdir, "outer"))
+    File.write(File.join(@tmpdir, "outer", "inner.rb"), "class Outer::Inner; def self.value; 1; end; end")
+    AutoloadReloadable.push_paths([@tmpdir])
+    assert_equal 1, Outer::INNER_VALUE
+  end
 end
