@@ -15,7 +15,7 @@ module AutoloadReloadable
       Dir.each_child(expanded_path) do |filename|
         expanded_filename = File.join(expanded_path, filename)
         basename = File.basename(filename, ".rb")
-        const_name = ActiveSupport::Inflector.classify(basename).to_sym
+        const_name = AutoloadReloadable.inflector.classify(basename).to_sym
         autoload_filename = parent.autoload?(const_name)
         loaded = !autoload_filename && parent.const_defined?(const_name)
 

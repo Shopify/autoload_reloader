@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     autoload_reloadable (0.1.0)
-      activesupport (>= 4.2)
 
 GEM
   remote: https://rubygems.org/
@@ -26,6 +25,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activesupport (>= 4.2)
   autoload_reloadable!
   bundler (~> 1.16)
   byebug

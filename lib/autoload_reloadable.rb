@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "active_support/inflector"
 require "autoload_reloadable/version"
 require "autoload_reloadable/ruby_backports"
 require "autoload_reloadable/constant_reference"
@@ -43,5 +42,21 @@ module AutoloadReloadable
   def self.clear
     Loaded.unload_all
     clear_paths
+  end
+
+  autoload :BasicInflector, "autoload_reloadable/basic_inflector"
+
+  def self.inflector
+    @inflector ||= begin
+      if defined?(ActiveSupport::Inflector)
+        ActiveSupport::Inflector
+      else
+        BasicInflector
+      end
+    end
+  end
+
+  class << self
+    attr_writer :inflector
   end
 end
