@@ -31,13 +31,7 @@ module AutoloadReloadable
   autoload :BasicInflector, "autoload_reloadable/basic_inflector"
 
   def self.inflector
-    @inflector ||= begin
-      if defined?(ActiveSupport::Inflector)
-        ActiveSupport::Inflector
-      else
-        BasicInflector
-      end
-    end
+    @inflector ||= BasicInflector
   end
 
   class << self
