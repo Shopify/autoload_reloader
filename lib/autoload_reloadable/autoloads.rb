@@ -75,7 +75,9 @@ module AutoloadReloadable
     def self.loaded(filename)
       if const_ref = const_ref_by_filename.delete(filename)
         mod = const_ref.parent.const_get(const_ref.name)
-        Loaded.add_reloadable(const_ref)
+        unless AutoloadReloadable.non_reloadable_paths.include?(const_ref.path_root)
+          Loaded.add_reloadable(const_ref)
+        end
         UnloadedNamespaces.loaded(mod)
         if const_ref_by_filename.empty?
           define_module_trace.disable

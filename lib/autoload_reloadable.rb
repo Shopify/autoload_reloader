@@ -42,5 +42,8 @@ module AutoloadReloadable
 
   class << self
     attr_writer :inflector
+    attr_accessor :non_reloadable_paths
   end
+
+  @non_reloadable_paths = Set.new
 end

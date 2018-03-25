@@ -10,6 +10,7 @@ class AutoloadReloadableTest < Minitest::Test
   def teardown
     FileUtils.remove_entry(@tmpdir)
     AutoloadReloadable.clear
+    AutoloadReloadable.non_reloadable_paths.clear
     assert_equal [], Object.constants - @top_level_constants
   end
 
@@ -186,5 +187,17 @@ class AutoloadReloadableTest < Minitest::Test
     File.write(File.join(@tmpdir, "outer", "inner.rb"), "class Outer::Inner; def self.value; 1; end; end")
     AutoloadReloadable::Paths.push(@tmpdir)
     assert_equal 1, Outer::INNER_VALUE
+  end
+
+  def test_non_reloadable_paths
+    File.write(File.join(@tmpdir, "foo.rb"), "module Foo; def self.value; 1; end; end")
+    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloadable.non_reloadable_paths << @tmpdir
+    assert_equal 1, Foo.value
+    File.write(File.join(@tmpdir, "foo.rb"), "module Foo; def self.value; 2; end; end")
+    AutoloadReloadable.reload
+    assert_equal 1, Foo.value
+  ensure
+    Object.send(:remove_const, :Foo) if defined?(::Foo)
   end
 end
