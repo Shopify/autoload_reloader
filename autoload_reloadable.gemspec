@@ -20,11 +20,13 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
+  spec.required_ruby_version = ">= 2.2.2"
+
   spec.add_development_dependency "activesupport", ">= 4.2"
   spec.add_development_dependency "bundler", "~> 1.16"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "minitest", "~> 5.0"
-  if RUBY_ENGINE == 'ruby' && Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("2.2")
+  if RUBY_ENGINE == 'ruby'
     spec.add_development_dependency "byebug"
   end
 end
