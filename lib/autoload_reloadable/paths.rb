@@ -45,13 +45,12 @@ module AutoloadReloadable
 
       def add(new_paths, prepend: false)
         return if new_paths.empty?
-        expanded_paths = new_paths.map { |path| File.expand_path(path) }
         if prepend
-          paths.unshift(expanded_paths)
+          paths.unshift(*new_paths)
         else
-          paths.concat(expanded_paths)
+          paths.concat(new_paths)
         end
-        expanded_paths.each do |path|
+        new_paths.each do |path|
           Autoloads.add_from_path(path, prepend: prepend)
         end
       end

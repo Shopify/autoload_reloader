@@ -11,7 +11,8 @@ module AutoloadReloadable
     end
     self.const_ref_by_filename = {}
 
-    def self.add_from_path(expanded_path, parent: Object, prepend: false, path_root: expanded_path)
+    def self.add_from_path(path, parent: Object, prepend: false, path_root: path)
+      expanded_path = File.expand_path(path)
       Dir.each_child(expanded_path) do |filename|
         expanded_filename = File.join(expanded_path, filename)
         basename = File.basename(filename, ".rb")
