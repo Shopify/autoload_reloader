@@ -14,10 +14,6 @@ module AutoloadReloadable
     end
 
     def self.unload_all
-      $LOADED_FEATURES.each do |feature|
-        Autoloads.loaded(feature)
-      end
-
       unloaded_features = Set.new
       reloadable.each do |ref|
         ref.parent.send(:remove_const, ref.name)
