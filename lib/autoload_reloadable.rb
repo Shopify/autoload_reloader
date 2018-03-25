@@ -10,25 +10,9 @@ require "autoload_reloadable/paths"
 require "autoload_reloadable/core_ext/kernel_require"
 
 module AutoloadReloadable
-  def self.push_paths(paths)
-    Paths.add_paths(paths)
-  end
-
-  def self.prepend_paths(paths)
-    Paths.add_paths(paths, prepend: true)
-  end
-
-  def self.clear_paths
-    Paths.clear
-  end
-
-  def self.replace_paths(paths)
-    clear_paths
-    Paths.add_paths(paths)
-  end
-
   def self.reload
-    Paths.reload
+    Loaded.unload_all
+    Paths.replace(Paths.to_a)
   end
 
   def self.eager_load
@@ -41,7 +25,7 @@ module AutoloadReloadable
 
   def self.clear
     Loaded.unload_all
-    clear_paths
+    Paths.clear
   end
 
   autoload :BasicInflector, "autoload_reloadable/basic_inflector"

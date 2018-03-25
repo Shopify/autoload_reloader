@@ -25,7 +25,7 @@ Or install it yourself as:
 require 'autoload_reloadable'
 
 # sets up autoloads by scanning the file system
-AutoloadReloadable.push_paths([__dir__])
+AutoloadReloadable::Paths.push(__dir__)
 
 # start using autoloaded constants
 Foo.bar # Foo autoloaded from "#{__dir__}/foo.rb"
