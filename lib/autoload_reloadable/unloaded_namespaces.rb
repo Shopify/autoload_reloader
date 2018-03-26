@@ -12,6 +12,7 @@ module AutoloadReloadable
     self.nested_autoloads = {}
 
     def self.loaded(mod)
+      return unless mod.is_a?(Module)
       nested = nested_autoloads.delete(mod.name)
       return unless nested
       nested.each_value do |constant_reference|
