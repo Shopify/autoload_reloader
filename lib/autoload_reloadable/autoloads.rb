@@ -6,6 +6,8 @@ module AutoloadReloadable
   module Autoloads
     AutoloadReloadable.private_constant :Autoloads
 
+    CONST_NAME_REGEX = /\A[A-Z][\w_]*\z/
+
     class << self
       attr_accessor :const_ref_by_filename
     end
@@ -16,7 +18,9 @@ module AutoloadReloadable
       Dir.each_child(expanded_path) do |filename|
         expanded_filename = File.join(expanded_path, filename)
         basename = File.basename(filename, ".rb")
-        const_name = AutoloadReloadable.inflector.camelize(basename).to_sym
+        const_name = AutoloadReloadable.inflector.camelize(basename)
+        next unless CONST_NAME_REGEX.match?(const_name)
+        const_name = const_name.to_sym
         autoload_filename = parent.autoload?(const_name)
         loaded = !autoload_filename && parent.const_defined?(const_name)
 
