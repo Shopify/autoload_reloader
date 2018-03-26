@@ -15,9 +15,9 @@ class AutoloadReloadableTest < Minitest::Test
   end
 
   def test_top_level_const
-    File.write(File.join(@tmpdir, "foo_bar.rb"), "class FooBar; end")
+    File.write(File.join(@tmpdir, "foo_bars.rb"), "class FooBars; end")
     AutoloadReloadable::Paths.push(@tmpdir)
-    assert_equal Class, FooBar.class
+    assert_equal Class, FooBars.class
   end
 
   def test_under_loaded_const
