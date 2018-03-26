@@ -8,6 +8,7 @@ require "autoload_reloadable/unloaded_namespaces"
 require "autoload_reloadable/loaded"
 require "autoload_reloadable/paths"
 require "autoload_reloadable/core_ext/kernel_require"
+require "set"
 
 module AutoloadReloadable
   def self.reload
