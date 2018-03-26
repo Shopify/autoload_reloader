@@ -5,10 +5,18 @@ that is based on Module#autoload instead of const_missing.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add this line to your application's Gemfile
+to use it by itself
 
 ```ruby
 gem 'autoload_reloadable'
+```
+
+Or add this line to the application's Gemfile to replace
+the const_missing based autoloading in rails' activesupport gem.
+
+```
+gem 'autoload_reloadable', require: 'autoload_reloadable/active_support_ext'
 ```
 
 And then execute:
@@ -21,17 +29,24 @@ Or install it yourself as:
 
 ## Usage
 
+This library can be used by itself as follows
+
 ```ruby
 require 'autoload_reloadable'
 
+File.write "foo.rb", "Foo = 1"
+
 # sets up autoloads by scanning the file system
-AutoloadReloadable::Paths.push(__dir__)
+AutoloadReloadable::Paths.push(Dir.pwd)
 
 # start using autoloaded constants
-Foo.bar # Foo autoloaded from "#{__dir__}/foo.rb"
+Foo # => 1
+
+File.write "foo.rb", "Foo = 2"
 
 # unload constants and re-scan paths to autoload them again
 AutoloadReloadable.reload
+Foo # => 2
 
 # load all autoloadable constants in the paths
 AutoloadReloadable.eager_load
