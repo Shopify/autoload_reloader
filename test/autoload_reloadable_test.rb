@@ -5,6 +5,8 @@ class AutoloadReloadableTest < Minitest::Test
   def setup
     @tmpdir = Dir.mktmpdir
     @top_level_constants = Object.constants
+    AutoloadReloadable.inflector # force autoload so loaded features don't change
+    @old_loaded_features = $LOADED_FEATURES.dup
   end
 
   def teardown
@@ -12,6 +14,7 @@ class AutoloadReloadableTest < Minitest::Test
     AutoloadReloadable.clear
     AutoloadReloadable.non_reloadable_paths.clear
     assert_equal [], Object.constants - @top_level_constants
+    assert_equal [], $LOADED_FEATURES - @old_loaded_features
   end
 
   def test_top_level_const
@@ -190,14 +193,17 @@ class AutoloadReloadableTest < Minitest::Test
   end
 
   def test_non_reloadable_paths
-    File.write(File.join(@tmpdir, "foo.rb"), "module Foo; def self.value; 1; end; end")
+    filename = File.join(@tmpdir, "foo.rb")
+    File.write(filename, "module Foo; def self.value; 1; end; end")
     AutoloadReloadable::Paths.push(@tmpdir)
     AutoloadReloadable.non_reloadable_paths << @tmpdir
     assert_equal 1, Foo.value
-    File.write(File.join(@tmpdir, "foo.rb"), "module Foo; def self.value; 2; end; end")
+    File.write(filename, "module Foo; def self.value; 2; end; end")
     AutoloadReloadable.reload
     assert_equal 1, Foo.value
+    assert $LOADED_FEATURES.include?(filename)
   ensure
     Object.send(:remove_const, :Foo) if defined?(::Foo)
+    $LOADED_FEATURES.delete(filename)
   end
 end
