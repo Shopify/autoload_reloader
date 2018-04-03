@@ -19,7 +19,7 @@ module AutoloadReloadable
     if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.4')
       refine Regexp do
         def match?(str)
-          (regexp =~ string) != nil
+          (self =~ str) != nil
         end
       end
     end
