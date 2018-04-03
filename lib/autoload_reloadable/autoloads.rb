@@ -13,7 +13,7 @@ module AutoloadReloadable
     end
     self.const_ref_by_filename = {}
 
-    def self.add_from_path(path, parent: Object, prepend: false, path_root: path)
+    def self.add_from_path(path, parent: Object, parent_name: nil, prepend: false, path_root: path)
       expanded_path = File.expand_path(path)
       Dir.each_child(expanded_path) do |filename|
         expanded_filename = File.join(expanded_path, filename)
@@ -23,6 +23,7 @@ module AutoloadReloadable
         const_name = const_name.to_sym
         autoload_filename = parent.autoload?(const_name)
         loaded = !autoload_filename && parent.const_defined?(const_name)
+        full_const_name = (parent_name.nil? ? const_name.to_s : "#{parent_name}::#{const_name}").freeze
 
         if filename.end_with?(".rb")
           next if loaded
@@ -30,24 +31,23 @@ module AutoloadReloadable
             const_ref = const_ref_by_filename[autoload_filename]
             next unless const_ref # autoload wasn't defined by this gem
             unless const_ref.directory?
-              const_path = full_const_name(parent, const_name)
-              warn "Multiple paths to autoload #{const_path}:\n  #{autoload_filename}\n  #{expanded_filename}"
+              warn "Multiple paths to autoload #{full_const_name}:\n  #{autoload_filename}\n  #{expanded_filename}"
               next unless prepend
             end
             remove(const_ref)
           end
-          add(ConstantReference.new(parent, const_name, expanded_filename, path_root))
+          add(ConstantReference.new(parent, const_name, full_const_name, expanded_filename, path_root))
         elsif File.directory?(expanded_filename)
           if loaded
             mod = parent.const_get(const_name)
-            add_from_path(expanded_filename, parent: mod, prepend: prepend, path_root: path_root)
+            add_from_path(expanded_filename, parent: mod, parent_name: full_const_name, prepend: prepend, path_root: path_root)
           else
             unless autoload_filename
-              add(ConstantReference.new(parent, const_name, expanded_filename, path_root))
+              add(ConstantReference.new(parent, const_name, full_const_name, expanded_filename, path_root))
             end
             UnloadedNamespaces.add_constants_from_path(
               expanded_filename,
-              parent_name: full_const_name(parent, const_name),
+              parent_name: full_const_name,
               prepend: prepend,
               path_root: path_root,
             )
@@ -82,7 +82,7 @@ module AutoloadReloadable
         unless AutoloadReloadable.non_reloadable_paths.include?(const_ref.path_root)
           Loaded.add_reloadable(const_ref)
         end
-        UnloadedNamespaces.loaded(mod)
+        UnloadedNamespaces.loaded(mod, mod_name: const_ref.full_const_name)
         if const_ref_by_filename.empty?
           define_module_trace.disable
         end
@@ -122,14 +122,6 @@ module AutoloadReloadable
       end
       loaded(filename)
       ret
-    end
-
-    class << self
-      private
-
-      def full_const_name(parent, const_name)
-        parent == Object ? const_name.to_s : "#{parent.name}::#{const_name}"
-      end
     end
   end
 end

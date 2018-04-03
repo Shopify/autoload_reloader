@@ -11,9 +11,9 @@ module AutoloadReloadable
     end
     self.nested_autoloads = {}
 
-    def self.loaded(mod)
+    def self.loaded(mod, mod_name: mod.name)
       return unless mod.is_a?(Module)
-      nested = nested_autoloads.delete(mod.name)
+      nested = nested_autoloads.delete(mod_name)
       return unless nested
       nested.each_value do |constant_reference|
         constant_reference.parent = mod
@@ -29,24 +29,25 @@ module AutoloadReloadable
         const_name = AutoloadReloadable.inflector.camelize(basename)
         next unless Autoloads::CONST_NAME_REGEX.match?(const_name)
         const_name = const_name.to_sym
+        full_const_name = "#{parent_name}::#{const_name}".freeze
         const_ref = autoloads[const_name]
 
         if filename.end_with?(".rb")
           if const_ref
             unless const_ref.directory?
-              warn "Multiple paths to autoload #{parent_name}::#{const_name}:\n  #{const_ref.filename}\n  #{expanded_filename}"
+              warn "Multiple paths to autoload #{full_const_name}:\n  #{const_ref.filename}\n  #{expanded_filename}"
               next unless prepend
             end
             autoloads.delete(const_name)
           end
-          autoloads[const_name] = ConstantReference.new(nil, const_name, expanded_filename, path_root)
+          autoloads[const_name] = ConstantReference.new(nil, const_name, full_const_name, expanded_filename, path_root)
         elsif File.directory?(expanded_filename)
           unless const_ref
-            autoloads[const_name] = ConstantReference.new(nil, const_name, expanded_filename, path_root)
+            autoloads[const_name] = ConstantReference.new(nil, const_name, full_const_name, expanded_filename, path_root)
           end
           add_constants_from_path(
             expanded_filename,
-            parent_name: "#{parent_name}::#{const_name}",
+            parent_name: full_const_name,
             prepend: prepend,
             path_root: path_root,
           )
