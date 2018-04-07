@@ -65,7 +65,7 @@ module AutoloadReloadable
       ActiveSupport::Inflector.inflections.acronym('API')
       File.write(File.join(@tmpdir, "foos_api.rb"), "class FoosAPI; end")
       ActiveSupport::Dependencies.autoload_paths << @tmpdir
-      assert_equal File.join(@tmpdir, "foos_api.rb"), Object.autoload?(:FoosAPI)
+      assert_equal File.join(expanded_load_path(@tmpdir), "foos_api.rb"), Object.autoload?(:FoosAPI)
     end
 
     def test_clear
@@ -78,7 +78,7 @@ module AutoloadReloadable
     end
 
     def test_autoload_once_paths
-      filename = File.join(@tmpdir, "foo.rb")
+      filename = File.join(expanded_load_path(@tmpdir), "foo.rb")
       File.write(filename, "class Foo; def self.value; 1; end; end")
       ActiveSupport::Dependencies.autoload_paths << @tmpdir
       ActiveSupport::Dependencies.autoload_once_paths << @tmpdir
@@ -93,7 +93,7 @@ module AutoloadReloadable
     end
 
     def test_no_const_missing_hook
-      filename = File.join(@tmpdir, "foo.rb")
+      filename = File.join(expanded_load_path(@tmpdir), "foo.rb")
       File.write(filename, "class Foo; end")
       ActiveSupport::Dependencies.autoload_paths << @tmpdir
       assert_raises(NameError, 'uninitialized constant Foo') do
@@ -103,7 +103,7 @@ module AutoloadReloadable
     end
 
     def test_unhook!
-      filename = File.join(@tmpdir, "foo.rb")
+      filename = File.join(expanded_load_path(@tmpdir), "foo.rb")
       File.write(filename, "class Foo; end")
       ActiveSupport::Dependencies.autoload_paths << @tmpdir
       pid = fork do
@@ -126,13 +126,19 @@ module AutoloadReloadable
     end
 
     def test_require_dependency
-      filename = File.join(@tmpdir, "foo.rb")
+      filename = File.join(expanded_load_path(@tmpdir), "foo.rb")
       File.write(filename, "class Foo; end")
       ActiveSupport::Dependencies.autoload_paths << @tmpdir
       require_dependency 'foo'
       assert defined?(::Foo)
       assert_nil Object.autoload?(:Foo)
       assert $LOADED_FEATURES.include?(filename)
+    end
+
+    private
+
+    def expanded_load_path(path)
+      Autoloads.expanded_load_path(path)
     end
   end
 end

@@ -14,7 +14,7 @@ module AutoloadReloadable
     self.const_ref_by_filename = {}
 
     def self.add_from_path(path, parent: Object, parent_name: nil, prepend: false, path_root: path)
-      expanded_path = File.expand_path(path)
+      expanded_path = expanded_load_path(path)
       Dir.each_child(expanded_path) do |filename|
         expanded_filename = File.join(expanded_path, filename)
         basename = File.basename(filename, ".rb")
@@ -122,6 +122,25 @@ module AutoloadReloadable
       end
       loaded(filename)
       ret
+    end
+
+    # Ruby 2.4.4+ get the realpath (i.e. resolve symlinks) when
+    # expanding load paths which we need to match so that a manual
+    # require can detect that an autoloaded constant was loaded
+    # based on the filename in $LOADED_FEATURES in the above require
+    # hook loaded uses a hash lookup.
+    REAL_LOAD_PATHS = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.4.4')
+
+    class << self
+      if REAL_LOAD_PATHS
+        def expanded_load_path(path)
+          File.realpath(path)
+        end
+      else
+        def expanded_load_path(path)
+          File.expand_path(path)
+        end
+      end
     end
   end
 end

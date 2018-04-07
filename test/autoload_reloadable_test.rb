@@ -132,7 +132,12 @@ class AutoloadReloadableTest < Minitest::Test
       dir
     end
     AutoloadReloadable::Paths.push(dirs[0])
-    assert_output(nil, "Multiple paths to autoload Foo:\n  #{dirs.first}/foo.rb\n  #{dirs.last}/foo.rb\n") do
+    expected_output = [
+      "Multiple paths to autoload Foo:\n",
+      "  #{expanded_load_path(dirs.first)}/foo.rb\n",
+      "  #{expanded_load_path(dirs.last)}/foo.rb\n"
+    ].join
+    assert_output(nil, expected_output) do
       AutoloadReloadable::Paths.prepend(dirs[1])
     end
     assert_equal :b, Foo.from
@@ -146,7 +151,12 @@ class AutoloadReloadableTest < Minitest::Test
       dir
     end
     AutoloadReloadable::Paths.push(dirs.first)
-    assert_output(nil, "Multiple paths to autoload Foo:\n  #{dirs.first}/foo.rb\n  #{dirs.last}/foo.rb\n") do
+    expected_output = [
+      "Multiple paths to autoload Foo:\n",
+      "  #{expanded_load_path(dirs.first)}/foo.rb\n",
+      "  #{expanded_load_path(dirs.last)}/foo.rb\n"
+    ].join
+    assert_output(nil, expected_output) do
       AutoloadReloadable::Paths.push(dirs.last)
     end
     assert_equal :a, Foo.from
@@ -193,7 +203,7 @@ class AutoloadReloadableTest < Minitest::Test
   end
 
   def test_non_reloadable_paths
-    filename = File.join(@tmpdir, "foo.rb")
+    filename = File.join(expanded_load_path(@tmpdir), "foo.rb")
     File.write(filename, "module Foo; def self.value; 1; end; end")
     AutoloadReloadable::Paths.push(@tmpdir)
     AutoloadReloadable.non_reloadable_paths << @tmpdir
@@ -205,5 +215,11 @@ class AutoloadReloadableTest < Minitest::Test
   ensure
     Object.send(:remove_const, :Foo) if defined?(::Foo)
     $LOADED_FEATURES.delete(filename)
+  end
+
+  private
+
+  def expanded_load_path(path)
+    AutoloadReloadable.const_get(:Autoloads).expanded_load_path(path)
   end
 end
