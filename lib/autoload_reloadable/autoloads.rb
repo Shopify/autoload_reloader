@@ -22,7 +22,7 @@ module AutoloadReloadable
         next unless CONST_NAME_REGEX.match?(const_name)
         const_name = const_name.to_sym
         autoload_filename = parent.autoload?(const_name)
-        loaded = !autoload_filename && parent.const_defined?(const_name)
+        loaded = !autoload_filename && parent.const_defined?(const_name, false)
         full_const_name = (parent_name.nil? ? const_name.to_s : "#{parent_name}::#{const_name}").freeze
 
         if filename.end_with?(".rb")
