@@ -14,6 +14,10 @@ module AutoloadReloadable
     self.const_ref_by_filename = {}
 
     def self.add_from_path(path, parent: Object, parent_name: nil, prepend: false, path_root: path)
+      unless File.directory?(path)
+        warn "[AutoloadReloadable] Warning: Autoload path directory not found: #{path}"
+        return
+      end
       expanded_path = expanded_load_path(path)
       Dir.each_child(expanded_path) do |filename|
         expanded_filename = File.join(expanded_path, filename)
