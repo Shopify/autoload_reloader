@@ -143,6 +143,20 @@ class AutoloadReloadableTest < Minitest::Test
     assert_equal :b, Foo.from
   end
 
+  def test_prepend_multiple_paths
+    dirs = %w(a b).map do |name|
+      dir = File.join(@tmpdir, name)
+      Dir.mkdir(dir)
+      File.write(File.join(dir, "foo.rb"), "module Foo; def self.from; :#{name}; end; end")
+      dir
+    end
+    assert_output(nil, /Multiple paths to autoload Foo/) do
+      AutoloadReloadable::Paths.prepend(*dirs)
+    end
+    assert_equal dirs, AutoloadReloadable::Paths.to_a
+    assert_equal :a, Foo.from
+  end
+
   def test_push_path_keeps_prev_autoload
     dirs = %w(a b).map do |name|
       dir = File.join(@tmpdir, name)

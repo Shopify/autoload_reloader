@@ -47,11 +47,14 @@ module AutoloadReloadable
         return if new_paths.empty?
         if prepend
           paths.unshift(*new_paths)
+          new_paths.reverse_each do |path|
+            Autoloads.add_from_path(path, prepend: true)
+          end
         else
           paths.concat(new_paths)
-        end
-        new_paths.each do |path|
-          Autoloads.add_from_path(path, prepend: prepend)
+          new_paths.each do |path|
+            Autoloads.add_from_path(path, prepend: false)
+          end
         end
       end
     end
