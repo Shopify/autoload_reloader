@@ -5,4 +5,4 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 # Specify your gem's dependencies in autoload_reloader.gemspec
 gemspec
 
-gem 'bootsnap', require: false
+gem 'bootsnap', require: false, path: '../bootsnap'
