@@ -197,6 +197,7 @@ class AutoloadReloaderTest < Minitest::Test
   end
 
   def test_autoload_nested_after_manual_require
+    skip "manual require not supported with Bootsnap" if defined?(Bootsnap) && Bootsnap.respond_to?(:setup)
     $LOAD_PATH << @tmpdir
     File.write(File.join(@tmpdir, "outer.rb"), "module Outer; end")
     Dir.mkdir(File.join(@tmpdir, "outer"))
