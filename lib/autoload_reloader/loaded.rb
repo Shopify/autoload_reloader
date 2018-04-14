@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module AutoloadReloadable
+module AutoloadReloader
   module Loaded
-    AutoloadReloadable.private_constant :Loaded
+    AutoloadReloader.private_constant :Loaded
 
     class << self
       attr_accessor :reloadable

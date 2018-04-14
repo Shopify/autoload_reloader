@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "autoload_reloadable/active_support_ext"
+require "autoload_reloader/active_support_ext"
 
-module AutoloadReloadable
+module AutoloadReloader
   class ActiveSupportExtTest < Minitest::Test
     def setup
       @tmpdir = Dir.mktmpdir
@@ -22,7 +22,7 @@ module AutoloadReloadable
 
     def test_autoload_paths_set
       ActiveSupport::Dependencies.autoload_paths = [@tmpdir]
-      assert_equal [@tmpdir], AutoloadReloadable::Paths.to_a
+      assert_equal [@tmpdir], AutoloadReloader::Paths.to_a
     end
 
     def test_autoload_paths_push
@@ -31,7 +31,7 @@ module AutoloadReloadable
         Dir.mkdir(dirname)
         ActiveSupport::Dependencies.autoload_paths.push(dirname)
       end
-      assert_equal dirs, AutoloadReloadable::Paths.to_a
+      assert_equal dirs, AutoloadReloader::Paths.to_a
     end
 
     def test_autoload_paths_unshift
@@ -40,7 +40,7 @@ module AutoloadReloadable
         Dir.mkdir(dirname)
         ActiveSupport::Dependencies.autoload_paths.unshift(dirname)
       end
-      assert_equal dirs.reverse, AutoloadReloadable::Paths.to_a
+      assert_equal dirs.reverse, AutoloadReloader::Paths.to_a
     end
 
     def test_autoload_paths_map!
@@ -50,7 +50,7 @@ module AutoloadReloadable
       Dir.mkdir(dir_b)
       ActiveSupport::Dependencies.autoload_paths << dir_a
       ActiveSupport::Dependencies.autoload_paths.map! { |dir| dir_b if dir == dir_a }
-      assert_equal [dir_b], AutoloadReloadable::Paths.to_a
+      assert_equal [dir_b], AutoloadReloader::Paths.to_a
     end
 
     def test_autoload_paths_push_after_set_to_new_array
@@ -58,7 +58,7 @@ module AutoloadReloadable
       paths << @tmpdir
       ActiveSupport::Dependencies.autoload_paths = paths.dup
       paths << File.join(Dir.tmpdir)
-      assert_equal [@tmpdir], AutoloadReloadable::Paths.to_a
+      assert_equal [@tmpdir], AutoloadReloader::Paths.to_a
     end
 
     def test_inflector
@@ -111,11 +111,11 @@ module AutoloadReloadable
         ActiveSupport::Dependencies.unhook!
         assert_nil Object.autoload?(:Foo)
         assert_nil defined?(::Foo)
-        assert_equal [], AutoloadReloadable::Paths.to_a
+        assert_equal [], AutoloadReloader::Paths.to_a
         ActiveSupport::Dependencies.autoload_paths << @tmpdir
-        assert_equal [], AutoloadReloadable::Paths.to_a
+        assert_equal [], AutoloadReloader::Paths.to_a
         ActiveSupport::Dependencies.autoload_paths = [@tmpdir]
-        assert_equal [], AutoloadReloadable::Paths.to_a
+        assert_equal [], AutoloadReloader::Paths.to_a
 
         # exit!(true) the process to get around fork issues on minitest 5
         # see https://github.com/seattlerb/minitest/issues/467

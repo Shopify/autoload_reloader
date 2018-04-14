@@ -1,4 +1,4 @@
-# AutoloadReloadable
+# AutoloadReloader
 
 An alternative to the rails autoloader (ActiveSupport::Dependencies)
 that is based on Module#autoload instead of const_missing.  As the
@@ -14,14 +14,14 @@ Add this line to your application's Gemfile
 to use it by itself
 
 ```ruby
-gem 'autoload_reloadable'
+gem 'autoload_reloader'
 ```
 
 Or add this line to the application's Gemfile to replace
 the const_missing based autoloading in rails' activesupport gem.
 
 ```
-gem 'autoload_reloadable', require: 'autoload_reloadable/active_support_ext'
+gem 'autoload_reloader', require: 'autoload_reloader/active_support_ext'
 ```
 
 And then execute:
@@ -30,19 +30,19 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install autoload_reloadable
+    $ gem install autoload_reloader
 
 ## Usage
 
 This library can be used by itself as follows
 
 ```ruby
-require 'autoload_reloadable'
+require 'autoload_reloader'
 
 File.write "foo.rb", "Foo = 1"
 
 # sets up autoloads by scanning the file system
-AutoloadReloadable::Paths.push(Dir.pwd)
+AutoloadReloader::Paths.push(Dir.pwd)
 
 # start using autoloaded constants
 Foo # => 1
@@ -50,11 +50,11 @@ Foo # => 1
 File.write "foo.rb", "Foo = 2"
 
 # unload constants and re-scan paths to autoload them again
-AutoloadReloadable.reload
+AutoloadReloader.reload
 Foo # => 2
 
 # load all autoloadable constants in the paths
-AutoloadReloadable.eager_load
+AutoloadReloader.eager_load
 ```
 
 ## How It Works
@@ -70,7 +70,7 @@ makes it sound like this gem shouldn't work
 so let's dispell some myths and explain how this gem works.
 
 When the paths are changed through Array like methods on
-`AutoloadReloadable::Paths`, this gem walks the file system as
+`AutoloadReloader::Paths`, this gem walks the file system as
 the rails guide suggested
 
 > One possible implementation based on `Module#autoload` would be to walk the
@@ -85,7 +85,7 @@ So let's start addressing the problems previously ran into with this approach
 > so reloading would not be possible.
 
 `require` will load a file again the file's path is removed from `$LOADED_FEATURES`
-so this is done when `AutoloadReloadable.reload` is called.
+so this is done when `AutoloadReloader.reload` is called.
 
 > Not only that, it uses an internal `require` which is not `Kernel#require`.
 
@@ -284,7 +284,7 @@ it prevents the constant from being reloaded. This isn't a problem
 with this gem. If you want to require a file without an absolute
 path (e.g. `require 'user'`) you simply need to make sure it can
 be found on the $LOAD_PATH which isn't done automatically by using
-`AutoloadReloadable::Paths` but is done for autoload paths in rails.
+`AutoloadReloader::Paths` but is done for autoload paths in rails.
 
 With this gem's Active Support integration, `require_dependency`
 is supported for comptibility, but can be safely replaced with
@@ -355,7 +355,7 @@ push the `.gem` file to [rubygems.org](https://rubygems.org).
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at
-https://github.com/dylanahsmith/autoload_reloadable.
+https://github.com/dylanahsmith/autoload_reloader.
 
 ## License
 

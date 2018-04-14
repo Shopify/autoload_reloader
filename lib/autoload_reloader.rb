@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-require "autoload_reloadable/version"
-require "autoload_reloadable/ruby_backports"
-require "autoload_reloadable/constant_reference"
-require "autoload_reloadable/autoloads"
-require "autoload_reloadable/unloaded_namespaces"
-require "autoload_reloadable/loaded"
-require "autoload_reloadable/paths"
-require "autoload_reloadable/core_ext/kernel_require"
+require "autoload_reloader/version"
+require "autoload_reloader/ruby_backports"
+require "autoload_reloader/constant_reference"
+require "autoload_reloader/autoloads"
+require "autoload_reloader/unloaded_namespaces"
+require "autoload_reloader/loaded"
+require "autoload_reloader/paths"
+require "autoload_reloader/core_ext/kernel_require"
 require "set"
 
-module AutoloadReloadable
+module AutoloadReloader
   def self.reload
     Loaded.unload_all
     Paths.replace(Paths.to_a)
@@ -29,7 +29,7 @@ module AutoloadReloadable
     Paths.clear
   end
 
-  autoload :BasicInflector, "autoload_reloadable/basic_inflector"
+  autoload :BasicInflector, "autoload_reloader/basic_inflector"
 
   def self.inflector
     @inflector ||= BasicInflector

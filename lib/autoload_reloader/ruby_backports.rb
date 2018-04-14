@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module AutoloadReloadable
+module AutoloadReloader
   module RubyBackports
-    AutoloadReloadable.private_constant :RubyBackports
+    AutoloadReloader.private_constant :RubyBackports
 
     if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.5')
       PARENT_AND_CURRENT_DIR = ['.', '..']

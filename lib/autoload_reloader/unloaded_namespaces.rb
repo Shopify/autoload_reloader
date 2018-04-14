@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-module AutoloadReloadable
+module AutoloadReloader
   using RubyBackports
 
   module UnloadedNamespaces
-    AutoloadReloadable.private_constant :UnloadedNamespaces
+    AutoloadReloader.private_constant :UnloadedNamespaces
 
     class << self
       attr_accessor :nested_autoloads
@@ -26,7 +26,7 @@ module AutoloadReloadable
       Dir.each_child(expanded_path) do |filename|
         expanded_filename = File.join(expanded_path, filename)
         basename = File.basename(filename, ".rb")
-        const_name = AutoloadReloadable.inflector.camelize(basename)
+        const_name = AutoloadReloader.inflector.camelize(basename)
         next unless Autoloads::CONST_NAME_REGEX.match?(const_name)
         const_name = const_name.to_sym
         full_const_name = "#{parent_name}::#{const_name}".freeze

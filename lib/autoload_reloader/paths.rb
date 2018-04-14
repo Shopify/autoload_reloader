@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module AutoloadReloadable
+module AutoloadReloader
   module Paths
     def self.concat(paths)
       add(paths, prepend: false)

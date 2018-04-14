@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 require "test_helper"
 
-module AutoloadReloadable
+module AutoloadReloader
   class VersionTest < Minitest::Test
     def test_version
-      assert_equal ::AutoloadReloadable::VERSION, Gem::Version.new(::AutoloadReloadable::VERSION).to_s
+      assert_equal ::AutoloadReloader::VERSION, Gem::Version.new(::AutoloadReloader::VERSION).to_s
     end
   end
 end

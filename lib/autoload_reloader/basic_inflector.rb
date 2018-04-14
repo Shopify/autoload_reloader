@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module AutoloadReloadable
+module AutoloadReloader
   module BasicInflector
     def self.camelize(underscore_name)
       underscore_name.split('_').map(&:capitalize).join

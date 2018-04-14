@@ -1,16 +1,16 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "autoload_reloadable/version"
+require "autoload_reloader/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "autoload_reloadable"
-  spec.version       = AutoloadReloadable::VERSION
+  spec.name          = "autoload_reloader"
+  spec.version       = AutoloadReloader::VERSION
   spec.authors       = ["Dylan Thacker-Smith"]
   spec.email         = ["Dylan.Smith@shopify.com"]
 
   spec.summary       = "Autoload and reload constants in path using Module#autoload"
-  spec.homepage      = "https://github.com/dylanahsmith/autoload_reloadable"
+  spec.homepage      = "https://github.com/dylanahsmith/autoload_reloader"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|

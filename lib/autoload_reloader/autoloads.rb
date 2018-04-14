@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-module AutoloadReloadable
+module AutoloadReloader
   using RubyBackports
 
   module Autoloads
-    AutoloadReloadable.private_constant :Autoloads
+    AutoloadReloader.private_constant :Autoloads
 
     CONST_NAME_REGEX = /\A[A-Z][\w_]*\z/
 
@@ -15,14 +15,14 @@ module AutoloadReloadable
 
     def self.add_from_path(path, parent: Object, parent_name: nil, prepend: false, path_root: path)
       unless File.directory?(path)
-        warn "[AutoloadReloadable] Warning: Autoload path directory not found: #{path}"
+        warn "[AutoloadReloader] Warning: Autoload path directory not found: #{path}"
         return
       end
       expanded_path = expanded_load_path(path)
       Dir.each_child(expanded_path) do |filename|
         expanded_filename = File.join(expanded_path, filename)
         basename = File.basename(filename, ".rb")
-        const_name = AutoloadReloadable.inflector.camelize(basename)
+        const_name = AutoloadReloader.inflector.camelize(basename)
         next unless CONST_NAME_REGEX.match?(const_name)
         const_name = const_name.to_sym
         autoload_filename = parent.autoload?(const_name)
@@ -83,7 +83,7 @@ module AutoloadReloadable
     def self.loaded(filename)
       if const_ref = const_ref_by_filename.delete(filename)
         mod = const_ref.parent.const_get(const_ref.name)
-        unless AutoloadReloadable.non_reloadable_paths.include?(const_ref.path_root)
+        unless AutoloadReloader.non_reloadable_paths.include?(const_ref.path_root)
           Loaded.add_reloadable(const_ref)
         end
         UnloadedNamespaces.loaded(mod, mod_name: const_ref.full_const_name)

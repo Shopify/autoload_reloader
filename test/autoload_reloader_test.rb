@@ -1,25 +1,25 @@
 # frozen_string_literal: true
 require "test_helper"
 
-class AutoloadReloadableTest < Minitest::Test
+class AutoloadReloaderTest < Minitest::Test
   def setup
     @tmpdir = Dir.mktmpdir
     @top_level_constants = Object.constants
-    AutoloadReloadable.inflector # force autoload so loaded features don't change
+    AutoloadReloader.inflector # force autoload so loaded features don't change
     @old_loaded_features = $LOADED_FEATURES.dup
   end
 
   def teardown
     FileUtils.remove_entry(@tmpdir)
-    AutoloadReloadable.clear
-    AutoloadReloadable.non_reloadable_paths.clear
+    AutoloadReloader.clear
+    AutoloadReloader.non_reloadable_paths.clear
     assert_equal [], Object.constants - @top_level_constants
     assert_equal [], $LOADED_FEATURES - @old_loaded_features
   end
 
   def test_top_level_const
     File.write(File.join(@tmpdir, "foo_bars.rb"), "class FooBars; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert_equal Class, FooBars.class
   end
 
@@ -28,9 +28,9 @@ class AutoloadReloadableTest < Minitest::Test
     namespace_path = File.join(@tmpdir, "loaded_namespace")
     Dir.mkdir(namespace_path)
     File.write(File.join(namespace_path, "foo.rb"), "class LoadedNamespace::Foo; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert_equal Class, LoadedNamespace::Foo.class
-    AutoloadReloadable.clear
+    AutoloadReloader.clear
     assert_nil defined?(LoadedNamespace::Foo)
     assert_equal "constant", defined?(LoadedNamespace)
   ensure
@@ -41,7 +41,7 @@ class AutoloadReloadableTest < Minitest::Test
     File.write(File.join(@tmpdir, "outer.rb"), "class Outer; end")
     Dir.mkdir(File.join(@tmpdir, "outer"))
     File.write(File.join(@tmpdir, "outer", "nested.rb"), "class Outer::Nested; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert_equal Class, Outer::Nested.class
     assert_equal Class, Outer.class
   end
@@ -52,7 +52,7 @@ class AutoloadReloadableTest < Minitest::Test
     File.write(File.join(@tmpdir, "outer", "nested.rb"), "class Outer::Nested; end")
     Dir.mkdir(File.join(@tmpdir, "outer", "nested"))
     File.write(File.join(@tmpdir, "outer", "nested", "deep.rb"), "class Outer::Nested::Deep; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert_equal Class, Outer::Nested::Deep.class
   end
 
@@ -60,7 +60,7 @@ class AutoloadReloadableTest < Minitest::Test
     Dir.mktmpdir do |dir2|
       File.write(File.join(@tmpdir, "foo.rb"), "class Foo; end")
       File.write(File.join(dir2, "bar.rb"), "class Bar; end")
-      AutoloadReloadable::Paths.push(@tmpdir, dir2)
+      AutoloadReloader::Paths.push(@tmpdir, dir2)
       assert_equal Class, Foo.class
       assert_equal Class, Bar.class
     end
@@ -68,33 +68,33 @@ class AutoloadReloadableTest < Minitest::Test
 
   def test_reload_const
     File.write(File.join(@tmpdir, "foo.rb"), "module Foo; def self.value; 1; end; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert_equal 1, Foo.value
     File.write(File.join(@tmpdir, "foo.rb"), "module Foo; def self.value; 2; end; end")
-    AutoloadReloadable.reload
+    AutoloadReloader.reload
     assert_equal 2, Foo.value
   end
 
   def test_reload_adds_new_const
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     File.write(File.join(@tmpdir, "foo.rb"), "class Foo; end")
-    AutoloadReloadable.reload
+    AutoloadReloader.reload
     assert_equal Class, Foo.class
   end
 
   def test_reload_remove_deleted_const
     File.write(File.join(@tmpdir, "foo.rb"), "class Foo; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert_equal Class, Foo.class
     File.delete(File.join(@tmpdir, "foo.rb"))
-    AutoloadReloadable.reload
+    AutoloadReloader.reload
     assert_nil defined?(Foo)
   end
 
   def test_autoload_implicit_module
     Dir.mkdir(File.join(@tmpdir, "outer"))
     File.write(File.join(@tmpdir, "outer", "foo.rb"), "class Outer::Foo; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert_equal Module, Outer.class
     assert_equal Class, Outer::Foo.class
   end
@@ -102,25 +102,25 @@ class AutoloadReloadableTest < Minitest::Test
   def test_reload_remove_deleted_implicit_module
     Dir.mkdir(File.join(@tmpdir, "outer"))
     File.write(File.join(@tmpdir, "outer", "foo.rb"), "class Outer::Foo; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     FileUtils.remove_entry(File.join(@tmpdir, "outer"))
-    AutoloadReloadable.reload
+    AutoloadReloader.reload
     assert_nil defined?(Outer)
   end
 
   def test_remove_path_removes_autoload
     File.write(File.join(@tmpdir, "foo.rb"), "class Foo; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert defined?(::Foo)
-    AutoloadReloadable::Paths.clear
+    AutoloadReloader::Paths.clear
     assert_nil defined?(::Foo)
   end
 
   def test_remove_path_keeps_autoloaded
     File.write(File.join(@tmpdir, "foo.rb"), "class Foo; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert_equal Class, Foo.class
-    AutoloadReloadable::Paths.clear
+    AutoloadReloader::Paths.clear
     assert_equal Class, Foo.class
   end
 
@@ -131,14 +131,14 @@ class AutoloadReloadableTest < Minitest::Test
       File.write(File.join(dir, "foo.rb"), "module Foo; def self.from; :#{name}; end; end")
       dir
     end
-    AutoloadReloadable::Paths.push(dirs[0])
+    AutoloadReloader::Paths.push(dirs[0])
     expected_output = [
       "Multiple paths to autoload Foo:\n",
       "  #{expanded_load_path(dirs.first)}/foo.rb\n",
       "  #{expanded_load_path(dirs.last)}/foo.rb\n"
     ].join
     assert_output(nil, expected_output) do
-      AutoloadReloadable::Paths.prepend(dirs[1])
+      AutoloadReloader::Paths.prepend(dirs[1])
     end
     assert_equal :b, Foo.from
   end
@@ -151,9 +151,9 @@ class AutoloadReloadableTest < Minitest::Test
       dir
     end
     assert_output(nil, /Multiple paths to autoload Foo/) do
-      AutoloadReloadable::Paths.prepend(*dirs)
+      AutoloadReloader::Paths.prepend(*dirs)
     end
-    assert_equal dirs, AutoloadReloadable::Paths.to_a
+    assert_equal dirs, AutoloadReloader::Paths.to_a
     assert_equal :a, Foo.from
   end
 
@@ -164,14 +164,14 @@ class AutoloadReloadableTest < Minitest::Test
       File.write(File.join(dir, "foo.rb"), "module Foo; def self.from; :#{name}; end; end")
       dir
     end
-    AutoloadReloadable::Paths.push(dirs.first)
+    AutoloadReloader::Paths.push(dirs.first)
     expected_output = [
       "Multiple paths to autoload Foo:\n",
       "  #{expanded_load_path(dirs.first)}/foo.rb\n",
       "  #{expanded_load_path(dirs.last)}/foo.rb\n"
     ].join
     assert_output(nil, expected_output) do
-      AutoloadReloadable::Paths.push(dirs.last)
+      AutoloadReloader::Paths.push(dirs.last)
     end
     assert_equal :a, Foo.from
   end
@@ -180,8 +180,8 @@ class AutoloadReloadableTest < Minitest::Test
     File.write(File.join(@tmpdir, "outer.rb"), "class Outer; end")
     Dir.mkdir(File.join(@tmpdir, "outer"))
     File.write(File.join(@tmpdir, "outer", "nested.rb"), "class Outer::Nested; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
-    AutoloadReloadable.eager_load
+    AutoloadReloader::Paths.push(@tmpdir)
+    AutoloadReloader.eager_load
     assert_nil Object.autoload?(:Outer)
     assert_equal "constant", defined?(Outer::Nested)
     assert_nil Outer.autoload?(:Nested)
@@ -191,7 +191,7 @@ class AutoloadReloadableTest < Minitest::Test
     File.write(File.join(@tmpdir, "outer.rb"), "Outer = Class.new")
     Dir.mkdir(File.join(@tmpdir, "outer"))
     File.write(File.join(@tmpdir, "outer", "nested.rb"), "class Outer::Nested; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert_equal Class, Outer::Nested.class
     assert_equal Class, Outer.class
   end
@@ -201,7 +201,7 @@ class AutoloadReloadableTest < Minitest::Test
     File.write(File.join(@tmpdir, "outer.rb"), "module Outer; end")
     Dir.mkdir(File.join(@tmpdir, "outer"))
     File.write(File.join(@tmpdir, "outer", "inner.rb"), "module Outer; class Inner; end; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     require 'outer'
     assert_equal Class, Outer::Inner.class
   ensure
@@ -212,18 +212,18 @@ class AutoloadReloadableTest < Minitest::Test
     File.write(File.join(@tmpdir, "outer.rb"), "class Outer; INNER_VALUE = Inner.value; end")
     Dir.mkdir(File.join(@tmpdir, "outer"))
     File.write(File.join(@tmpdir, "outer", "inner.rb"), "class Outer::Inner; def self.value; 1; end; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
+    AutoloadReloader::Paths.push(@tmpdir)
     assert_equal 1, Outer::INNER_VALUE
   end
 
   def test_non_reloadable_paths
     filename = File.join(expanded_load_path(@tmpdir), "foo.rb")
     File.write(filename, "module Foo; def self.value; 1; end; end")
-    AutoloadReloadable::Paths.push(@tmpdir)
-    AutoloadReloadable.non_reloadable_paths << @tmpdir
+    AutoloadReloader::Paths.push(@tmpdir)
+    AutoloadReloader.non_reloadable_paths << @tmpdir
     assert_equal 1, Foo.value
     File.write(filename, "module Foo; def self.value; 2; end; end")
-    AutoloadReloadable.reload
+    AutoloadReloader.reload
     assert_equal 1, Foo.value
     assert $LOADED_FEATURES.include?(filename)
   ensure
@@ -234,6 +234,6 @@ class AutoloadReloadableTest < Minitest::Test
   private
 
   def expanded_load_path(path)
-    AutoloadReloadable.const_get(:Autoloads).expanded_load_path(path)
+    AutoloadReloader.const_get(:Autoloads).expanded_load_path(path)
   end
 end

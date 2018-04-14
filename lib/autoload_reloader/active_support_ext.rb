@@ -2,11 +2,11 @@
 
 require 'active_support/inflector'
 require 'active_support/dependencies'
-require 'autoload_reloadable'
+require 'autoload_reloader'
 
-module AutoloadReloadable
+module AutoloadReloader
   module PathsSync
-    AutoloadReloadable.private_constant :PathsSync
+    AutoloadReloader.private_constant :PathsSync
 
     class << self
       attr_reader :autoload_paths
@@ -51,7 +51,7 @@ module AutoloadReloadable
   end
 
   module DependenciesExt
-    AutoloadReloadable.private_constant :DependenciesExt
+    AutoloadReloader.private_constant :DependenciesExt
 
     def autoload_paths=(paths)
       super
@@ -60,22 +60,22 @@ module AutoloadReloadable
     end
 
     def autoload_once_paths=(paths)
-      AutoloadReloadable.non_reloadable_paths = super
+      AutoloadReloader.non_reloadable_paths = super
     end
 
     def clear
       ret = super
-      AutoloadReloadable.reload
+      AutoloadReloader.reload
       ret
     end
 
     def unhook!
       PathsSync.disable
-      AutoloadReloadable::Paths.clear
+      AutoloadReloader::Paths.clear
       super
     end
 
-    # AutoloadReloadable always uses `require` for autoloading
+    # AutoloadReloader always uses `require` for autoloading
     def load?
       false
     end
