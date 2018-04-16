@@ -38,7 +38,7 @@ module AutoloadReloader
     %i(
       []= collect! compact! delete delete_at delete_if fill flatten!
       insert keep_if map! pop reject! reverse! rotate! select!
-      shift shuffle! slice! sort! uniq!
+      shift shuffle! slice! sort! sort_by! uniq!
     ).each do |method_name|
       define_method(method_name) do |*args, &block|
         ret = super(*args, &block)
