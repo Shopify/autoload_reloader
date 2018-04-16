@@ -72,9 +72,9 @@ module AutoloadReloader
       File.write(File.join(@tmpdir, "foo.rb"), "class Foo; def self.value; 1; end; end")
       ActiveSupport::Dependencies.autoload_paths << @tmpdir
       assert_equal 1, Foo.value
-      File.write(File.join(@tmpdir, "foo.rb"), "class Foo; def self.value; 2; end; end")
+      File.write(File.join(@tmpdir, "foo.rb"), "class Foo; def self.value; 22; end; end")
       ActiveSupport::Dependencies.clear
-      assert_equal 2, Foo.value
+      assert_equal 22, Foo.value
     end
 
     def test_autoload_once_paths
