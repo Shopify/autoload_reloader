@@ -87,17 +87,16 @@ module AutoloadReloader
     # when it is also done in ruby will avoid a mismatch in
     # Autoloads.around_require when trying to detect an autoload
     # is loaded using a hash lookup of the filename.
-    if Autoloads::REAL_LOAD_PATHS
-      def search_for_file(path_suffix)
-        path_suffix = path_suffix.sub(/(\.rb)?$/, ".rb".freeze)
-        path = super(path_suffix)
-        if path && path.end_with?(path_suffix)
-          load_path = path.slice(0, path.length - path_suffix.length)
-          load_path = File.realpath(load_path)
-          path = File.join(load_path, path_suffix)
-        end
-        path
+    def search_for_file(path_suffix)
+      return super unless Autoloads.use_real_load_paths?
+      path_suffix = path_suffix.sub(/(\.rb)?$/, ".rb".freeze)
+      path = super(path_suffix)
+      if path && path.end_with?(path_suffix)
+        load_path = path.slice(0, path.length - path_suffix.length)
+        load_path = File.realpath(load_path)
+        path = File.join(load_path, path_suffix)
       end
+      path
     end
   end
 

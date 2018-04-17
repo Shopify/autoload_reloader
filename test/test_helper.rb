@@ -7,9 +7,9 @@ unless ENV['USE_BOOTSNAP'].to_s.empty?
     development_mode:     true,
     load_path_cache:      true,
     autoload_paths_cache: true,
-    disable_trace:        false,
-    compile_cache_iseq:   false,
-    compile_cache_yaml:   false
+    disable_trace:        false, # prevents TracePoint from working
+    compile_cache_iseq:   true,
+    compile_cache_yaml:   true
   )
 end
 

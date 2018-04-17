@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'tmpdir'
+
 module AutoloadReloader
   using RubyBackports
 
@@ -128,22 +130,49 @@ module AutoloadReloader
       ret
     end
 
-    # Ruby 2.4.4+ get the realpath (i.e. resolve symlinks) when
+    # MRI Ruby 2.4.4+ get the realpath (i.e. resolve symlinks) when
     # expanding load paths which we need to match so that a manual
     # require can detect that an autoloaded constant was loaded
     # based on the filename in $LOADED_FEATURES in the above require
     # hook loaded uses a hash lookup.
-    REAL_LOAD_PATHS = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.4.4')
+    #
+    # Use feature detection since now only does it depend on the ruby
+    # version and ruby implementation, but may also depend on the
+    # presence of a gem like bootsnap that patches require.
+    def self.use_real_load_paths?
+      return @use_real_load_paths if defined?(@use_real_load_paths)
 
-    class << self
-      if REAL_LOAD_PATHS
-        def expanded_load_path(path)
-          File.realpath(path)
+      Dir.mktmpdir do |tmp_dir|
+        real_load_path = File.join(File.realpath(tmp_dir), "real")
+        real_file_path = File.join(real_load_path, "autoload_reloader", "test_feature.rb")
+        sym_load_path = File.join(tmp_dir, "sym")
+        sym_file_path = File.join(sym_load_path, "autoload_reloader", "test_feature.rb")
+        FileUtils.mkdir_p(File.dirname(real_file_path))
+        begin
+          File.symlink(real_load_path, sym_load_path)
+        rescue NotImplementedError
+          @use_real_load_paths = false
+          return false
         end
+        File.write(real_file_path, "")
+        $LOAD_PATH << sym_load_path
+        require "autoload_reloader/test_feature"
+        $LOAD_PATH.delete(sym_load_path)
+        @use_real_load_paths = if $LOADED_FEATURES.delete(real_file_path)
+          true
+        elsif $LOADED_FEATURES.delete(sym_file_path)
+          false
+        else
+          raise "failed to map required file to loaded feature"
+        end
+      end
+    end
+
+    def self.expanded_load_path(path)
+      if use_real_load_paths?
+        File.realpath(path)
       else
-        def expanded_load_path(path)
-          File.expand_path(path)
-        end
+        File.expand_path(path)
       end
     end
   end
