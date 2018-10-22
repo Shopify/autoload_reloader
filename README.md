@@ -355,7 +355,7 @@ push the `.gem` file to [rubygems.org](https://rubygems.org).
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at
-https://github.com/dylanahsmith/autoload_reloader.
+https://github.com/Shopify/autoload_reloader.
 
 ## License
 
