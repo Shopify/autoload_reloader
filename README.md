@@ -165,7 +165,7 @@ When a constant with the same name is in a namespace and a parent
 namespace, then Rails recommends to use a qualified constant
 to avoid accidentally using the constant in the parent namespace.
 However, this doesn't work if the constant in the inner namespace
-is a private constnat, because it is internal to that inner namespace.
+is a private constant, because it is internal to that inner namespace.
 
 For example, you may make `Admin::User` private
 
@@ -179,7 +179,7 @@ end
 
 but now the code
 
-```
+```ruby
 module Admin
   class UsersController < ApplicationController
     def index
@@ -201,7 +201,7 @@ and it will work reliably.
 When using Rails' `const_missing` based autoloader, `Admin::User`
 reference would work the first time if neither `::User` or `Admin::User`
 were already loaded, regardless of the namespace it is called from,
-since `const_missing` doesn't know how the constant was reference.
+since `const_missing` doesn't know how the constant was referenced.
 This differing behaviour on first use adds extra developer confusion.
 The next time it comes to the constant reference it will get the
 above mentioned NameError, but then it can't be fixed by changing
@@ -230,7 +230,7 @@ end
 would use Admin::User if it were defined and Admin::UsersTest::User
 weren't also defined, but the following code
 
-```
+```ruby
 class Admin::UsersTest < ActiveSupport::TestCase
   Module.nesting # => [Admin::UsersTest]
   test "new" do
@@ -287,7 +287,7 @@ be found on the $LOAD_PATH which isn't done automatically by using
 `AutoloadReloader::Paths` but is done for autoload paths in rails.
 
 With this gem's Active Support integration, `require_dependency`
-is supported for comptibility, but can be safely replaced with
+is supported for compatibility, but can be safely replaced with
 `require` where still needed (e.g. for [Single Table Inheritance
 ](http://guides.rubyonrails.org/v5.1/autoloading_and_reloading_constants.html#autoloading-and-sti)).
 
