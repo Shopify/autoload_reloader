@@ -301,11 +301,13 @@ Although MRI no longer uses an internal require to load autoload
 constants, other ruby implementations still appear to use an
 internal require as older version of MRI ruby did.
 
-I have noticed this internal require autoload behaviour for
+I have noticed this internal require autoload behaviour for:
 
-* JRuby 9.1.16.0
+* JRuby 9.1.16.0 (although support is [on the way][jruby])
 * Rubinius 3.100
 * TruffleRuby 0.33
+
+[jruby]: https://github.com/jruby/jruby/issues/5403
 
 ### Non-CamelCased Constants
 
