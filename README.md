@@ -14,23 +14,19 @@ Add this line to your application's Gemfile
 to use it by itself
 
 ```ruby
-gem 'autoload_reloader'
+gem 'autoload_reloader', github: 'Shopify/autoload_reloader'
 ```
 
 Or add this line to the application's Gemfile to replace
 the const_missing based autoloading in rails' activesupport gem.
 
 ```
-gem 'autoload_reloader', require: 'autoload_reloader/active_support_ext'
+gem 'autoload_reloader', github: 'Shopify/autoload_reloader', require: 'autoload_reloader/active_support_ext'
 ```
 
 And then execute:
 
     $ bundle
-
-Or install it yourself as:
-
-    $ gem install autoload_reloader
 
 ## Usage
 
