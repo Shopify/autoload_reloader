@@ -80,7 +80,7 @@ So let's start addressing the problems previously ran into with this approach
 > For example, `Module#autoload` is only capable of loading files using `require`,
 > so reloading would not be possible.
 
-`require` will load a file again the file's path is removed from `$LOADED_FEATURES`
+`require` will load a file again if the file's path is removed from `$LOADED_FEATURES`,
 so this is done when `AutoloadReloader.reload` is called.
 
 > Not only that, it uses an internal `require` which is not `Kernel#require`.
@@ -95,7 +95,7 @@ through `Module#autoload`.
 > Then, it provides no way to remove declarations in case a file is deleted.
 
 A constant is considered defined (in a special autoload state) after
-using Module#autoload before the file itself it loaded, so the
+using `Module#autoload` before the file itself it loaded, so the
 autoload can be removed using `Module#remove_const` when the file
 is deleted.
 
@@ -143,10 +143,10 @@ end
 ```
 
 and there are autoloadable `::User` and `::Admin::User` constants,
-then without using Module#autoload, the code would use `::User` if
+then without using `Module#autoload`, the code would use `::User` if
 it has been loaded and `::Admin::User` has not yet been loaded.
 
-This isn't a problem with Module#autoload, because ruby finds the
+This isn't a problem with `Module#autoload`, because ruby finds the
 `::Admin::User` constant when doing the constant resolution and
 autoloads the constant rather than using `::User`.
 
@@ -195,7 +195,7 @@ above mentioned NameError and can simply be replaced with `User.all`
 and it will work reliably.
 
 When using Rails' `const_missing` based autoloader, `Admin::User`
-reference would work the first time if neither `::User` or `Admin::User`
+reference would work the first time if neither `::User` nor `Admin::User`
 were already loaded, regardless of the namespace it is called from,
 since `const_missing` doesn't know how the constant was referenced.
 This differing behaviour on first use adds extra developer confusion.
@@ -308,7 +308,7 @@ I have noticed this internal require autoload behaviour for:
 ### Non-CamelCased Constants
 
 The Rails' autoloader infers the filename from the constant name
-(using String#underscore) so is able to work with UPPER_CASE named
+(using `String#underscore`) so is able to work with UPPER_CASE named
 constants.
 
 In contrast, this gem infers the constant name from the filename, so
